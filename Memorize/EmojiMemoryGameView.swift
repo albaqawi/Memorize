@@ -14,7 +14,7 @@ struct EmojiMemoryGameView: View {
     @ObservedObject var viewModel: EmojiMemoryGame
     var body: some View {
         VStack {
-            Text("\(viewModel.model.score)").font(.system(size: 50, weight: .bold, design: .serif)).padding(.top, 8)
+            Text("\(viewModel.model.score)").font(.system(size: 50, weight: .bold, design: .serif)).padding(4)
             Grid(viewModel.cards) {card in
                 CardView(card: card, themeColor: self.viewModel.model.theme.gameBackgroundColor).onTapGesture {
                         self.viewModel.choose(card: card)
@@ -22,7 +22,7 @@ struct EmojiMemoryGameView: View {
             .padding(8)
                 }
             .padding()
-            .foregroundColor(Color.pink)// To prove overriding is element to upper
+            .foregroundColor(Color.pink)// To prove overriding is delegated inward
             //.font(viewModel.cards.count < 10 ? .largeTitle : .body)
             
             Button(action: {
@@ -59,19 +59,23 @@ struct CardView: View {
     
     //this is a trick to clean up and remove need to use self. on all objects
     func body(for size: CGSize) -> some View {
-         ZStack {
-                       if self.card.isFaceUp {
-                           RoundedRectangle(cornerRadius: cornerRadius).fill(Color.white)
-                           RoundedRectangle(cornerRadius: cornerRadius).stroke(lineWidth: edgeLineWidth)
-                           Text(self.card.content)
-                       } else {
-                        if !card.isMatched {
-                            RoundedRectangle(cornerRadius: cornerRadius).fill(themeColor)
-                        }
-                       }
-                       //we want to make things dynamic where we do not have to worry on aspect ratio or device rotations
-                   }.font(Font.system(size: fontSize(for: size)))
-                   //.aspectRatio(2/3, contentMode: .fit)
+        let gradientLayer = Gradient(colors: [Color.white, themeColor])
+        let gradiantCardColor = LinearGradient(gradient: gradientLayer, startPoint: .leading, endPoint: .topTrailing)
+        
+         return ZStack {
+            if self.card.isFaceUp {
+                RoundedRectangle(cornerRadius: cornerRadius).fill(Color.white)
+                RoundedRectangle(cornerRadius: cornerRadius).stroke(lineWidth: edgeLineWidth)
+                Text(self.card.content)
+            } else {
+                if !card.isMatched {
+                    RoundedRectangle(cornerRadius: cornerRadius).fill(gradiantCardColor)
+                    RoundedRectangle(cornerRadius: cornerRadius).stroke(lineWidth: edgeLineWidth)
+                }
+            }
+            //we want to make things dynamic where we do not have to worry on aspect ratio or device rotations
+         }.font(Font.system(size: fontSize(for: size)))
+        //.aspectRatio(2/3, contentMode: .fit)
     }
     
     // MARK: - Drawing Constants

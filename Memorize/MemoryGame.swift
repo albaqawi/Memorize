@@ -15,9 +15,8 @@ struct MemoryGame<CardContent> where CardContent: Equatable {
     var cards: Array<Card>
     var theme: GameTheme
     var score: Int = 0
-    var seenCards = Set<Int>()
 
-    //MARK - Must watch Lecture #4 to review how code got refactored and minimized
+    //MARK - Must watch Lecture #4 to review how code got refactored and minimized - indexOfTheOneAndOnlyFaceUpCard
     
     //to ensure we follow best coding style and no error prone ways - we want a computed value from the cards only as a single point of truth. this is done with setters and getters
     var indexOfTheOneAndOnlyFaceUpCard: Int? {
@@ -25,13 +24,14 @@ struct MemoryGame<CardContent> where CardContent: Equatable {
             //[Int] is short hand for Array<Int>
             //$0 is the first arrgument of the filter func which is index
             let faceUpCardIndicies = cards.indices.filter { cards[$0].isFaceUp }
+            //get back the first value - the 1st match!
             return faceUpCardIndicies.only
         }
         set {
             for index in cards.indices {
                 // newValue is a special var that is an Optional, and an Int is NEVER true to an optional nil
                 // then they both have to match in Int values
-                    cards[index].isFaceUp = index == newValue // if true or false on 1 line
+                    cards[index].isFaceUp = index == newValue // if true or false on 1 line, setting isFaceUp only if index in itteration = the pressed card index
                
             }
         }
@@ -49,9 +49,11 @@ struct MemoryGame<CardContent> where CardContent: Equatable {
     // mutating gives us this option to change things in the strcut in the heep
     mutating func choose(card: Card) {
         print("card chosen:  \(card)")
+        // get the 1st card, the card is not face down and not highlighted as matched
         if let chosenIndex: Int = cards.firstIndex(matching: card), !cards[chosenIndex].isFaceUp, !cards[chosenIndex].isMatched {
             print("chosenIndex : \(chosenIndex)")
-            //find a matching card
+            // if found a matching card
+            // here we use the getter of indexOfTheOneAndOnlyFaceUpCard
             if let potentialMatchIndex = indexOfTheOneAndOnlyFaceUpCard {
                 if cards[chosenIndex].content == cards[potentialMatchIndex].content {
                     cards[chosenIndex].isMatched = true
@@ -77,30 +79,13 @@ struct MemoryGame<CardContent> where CardContent: Equatable {
                 //this next line will flip cards open / face up on mismatch
                 cards[chosenIndex].isFaceUp = true
             } else {
-               // only 1 card up st atsrt of game
+               // only 1 card up  at start of game, here we use the setter of indexOfTheOneAndOnlyFaceUpCard
                 indexOfTheOneAndOnlyFaceUpCard = chosenIndex
             }
-            //this line will flip the card in the  array value of the model instance
-            //self.cards[chosenIndex].isFaceUp = !self.cards[chosenIndex].isFaceUp
         }
-        //this is how! changing in place
-        
-        //this will not work as this is also coping by value (new item into chosenCard) and will not reflect the change
-//        let chosenCard: Card = self.cards[chosenIndex]
-//        chosenCard.isFaceUp = !chosenCard.isFaceUp
+
     }
     
-
-    // helper func to return the index of array element
-//    func index(of card: Card) -> Int {
-//        for index in 0..<self.cards.count {
-//            if self.cards[index].id == card.id {
-//                return index
-//            }
-//        }
-//        return 0 // TODO: bogus! to fix
-//    }
-        
     init(numberOfPairsOfCards: Int, theme: GameTheme, score: Int = 0, cardContentFactory: (Int) -> CardContent) {
         cards = Array<Card>()
         self.theme = theme
