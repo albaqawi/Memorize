@@ -33,7 +33,7 @@ enum GameTheme: Int, CaseIterable {
         case .jobs:
             return ["👩🏾‍✈️","💂🏻‍♂️","👷🏽‍♂️","👨‍🎨","🤴🏻"]
         case .stuff:
-            return ["📱"] //"🧯","💸","🧰",
+            return ["📱"]
 //        default:
 //            return [""]
         }
@@ -88,7 +88,7 @@ class EmojiMemoryGame: ObservableObject {
     //
     //static KEY WORD to be able to avoid the catch 22 case of setting something from within with initialization of model
     //static makes the function on the TYPE not in instance so always ready
-    static func createMemoryGame() -> MemoryGame<String> {
+    private static func createMemoryGame() -> MemoryGame<String> {
         let theme = GameTheme.allCases.randomElement()!
         print("The theme is \(theme.title)")
         
@@ -112,6 +112,19 @@ class EmojiMemoryGame: ObservableObject {
         // In assignment 2 if we keep shuffle here it will force redraw all the cards in diff order, so this needs to be in emoji decliration
         model.cards//.shuffled()
     }
+    
+    var color: Color {
+        return model.theme.gameBackgroundColor
+    }
+       
+    var themeName: String {
+        return model.theme.title
+       }
+    
+    var score: Int {
+        return model.score
+      }
+        
     
     // MARK: - Intents
     //select a pickede card

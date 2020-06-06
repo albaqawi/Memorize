@@ -11,8 +11,8 @@ import Foundation
 //we had to extend to Protocol Equatable, in order to use the operator (==)
 
 struct MemoryGame<CardContent> where CardContent: Equatable {
-    //Array of objects
-    var cards: Array<Card>
+    //Array of objects and can only be set within the model!
+    private(set) var cards: Array<Card>
     var theme: GameTheme
     var score: Int = 0
 
@@ -88,7 +88,6 @@ struct MemoryGame<CardContent> where CardContent: Equatable {
     
     init(numberOfPairsOfCards: Int, theme: GameTheme, score: Int = 0, cardContentFactory: (Int) -> CardContent) {
         cards = Array<Card>()
-        self.theme = theme
         for pairIndex in 0..<numberOfPairsOfCards {
             //to retreive every content in array
             let content = cardContentFactory(pairIndex)
@@ -96,6 +95,8 @@ struct MemoryGame<CardContent> where CardContent: Equatable {
             cards.append(Card(id: pairIndex*2+1, content: content))
         }
         self.cards = cards.shuffled()
+        self.theme = theme
+
     }
     
 }

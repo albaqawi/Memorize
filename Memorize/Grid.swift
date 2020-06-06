@@ -12,8 +12,9 @@ import SwiftUI
 //this is perfect example of using Generics with conditions for Contraints and Gains
 //so we are using Generic DataStract Grid with Protocols View and Identifiable to have a powerful feature
 struct Grid<Item, ItemView>: View where Item: Identifiable, ItemView: View {
-    var items : [Item] // or can write it as follows to declare and instantiate items = [Item]()
-    var viewForItem: (Item) -> ItemView
+   //both params do not need to be public as we have a public init func to set them up
+    private var items : [Item] // or can write it as follows to declare and instantiate items = [Item]()
+    private var viewForItem: (Item) -> ItemView
     
     //if we want to show ForEach like in a view Builder HStack or VStack! we use external name of param ForEach
     //if we want the param name to be ommited then we use _, this is the perfect example to use _ in Swift
@@ -34,14 +35,14 @@ struct Grid<Item, ItemView>: View where Item: Identifiable, ItemView: View {
         }
     }
         
-        func body(for layout: GridLayout) -> some View {
+    private func body(for layout: GridLayout) -> some View {
                 print(items)
                 return ForEach(items) { item in
                     self.body(for: item,in: layout)
                 }
         }
     
-    func body(for item: Item, in layout: GridLayout) -> some View {
+    private func body(for item: Item, in layout: GridLayout) -> some View {
         //the Bang ! helps force unwrap the Optional type into Int data type to use it and resolve the Bogus situation
             let index = items.firstIndex(matching: item)!
         //

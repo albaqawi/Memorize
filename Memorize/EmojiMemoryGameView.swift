@@ -14,14 +14,14 @@ struct EmojiMemoryGameView: View {
     @ObservedObject var viewModel: EmojiMemoryGame
     var body: some View {
         VStack {
-            Text("\(viewModel.model.score)").font(.system(size: 50, weight: .bold, design: .serif)).padding(4)
+            Text("\(viewModel.score)").font(.system(size: 50, weight: .bold, design: .serif)).padding(.top, 50)
             Grid(viewModel.cards) {card in
-                CardView(card: card, themeColor: self.viewModel.model.theme.gameBackgroundColor).onTapGesture {
+                CardView(card: card, themeColor: self.viewModel.color).onTapGesture {
                         self.viewModel.choose(card: card)
                     }
             .padding(8)
                 }
-            .padding()
+            .padding(.top,0)
             .foregroundColor(Color.pink)// To prove overriding is delegated inward
             //.font(viewModel.cards.count < 10 ? .largeTitle : .body)
             
@@ -31,7 +31,7 @@ struct EmojiMemoryGameView: View {
                 Text("Start Over!").fontWeight(.bold)
                 .font(.title)
                 .padding()
-                    .background(viewModel.model.theme.gameBackgroundColor)
+                    .background(viewModel.color)
                 .foregroundColor(.white)
                 .cornerRadius(40)
                 .overlay(
@@ -58,37 +58,41 @@ struct CardView: View {
     }
     
     //this is a trick to clean up and remove need to use self. on all objects
-    func body(for size: CGSize) -> some View {
-        let gradientLayer = Gradient(colors: [Color.white, themeColor])
-        let gradiantCardColor = LinearGradient(gradient: gradientLayer, startPoint: .leading, endPoint: .topTrailing)
-        
-         return ZStack {
-            if self.card.isFaceUp {
-                RoundedRectangle(cornerRadius: cornerRadius).fill(Color.white)
-                RoundedRectangle(cornerRadius: cornerRadius).stroke(lineWidth: edgeLineWidth)
+    //remember ViewBuilder will never show the LIST of VIEWS! if you have any variables or papamaters... make sure everything is called in as functions 
+    @ViewBuilder
+    private func body(for size: CGSize) -> some View {
+        //now we do the branch logic ahead to check for matching
+        //following line will ensure we remove any pair already matched
+        if card.isFaceUp || !card.isMatched {
+                ZStack {
+                Pie(startAngle: Angle.degrees(0-90), endAngle: Angle.degrees(110-90),clockwise: true)
+                    .padding(5).opacity(0.7)
                 Text(self.card.content)
-            } else {
-                if !card.isMatched {
-                    RoundedRectangle(cornerRadius: cornerRadius).fill(gradiantCardColor)
-                    RoundedRectangle(cornerRadius: cornerRadius).stroke(lineWidth: edgeLineWidth)
-                }
-            }
-            //we want to make things dynamic where we do not have to worry on aspect ratio or device rotations
-         }.font(Font.system(size: fontSize(for: size)))
-        //.aspectRatio(2/3, contentMode: .fit)
+                    .font(Font.system(size: fontSize(for: size)))
+             }
+            //we showed 2 ways to use the modifer in the long and short  form
+             //.modifier(Cardify(isFaceUp: card.isFaceUp, cardColor: gradiantCardColor))
+                .cardify(isFaceUp: card.isFaceUp, cardColor: gradiantColor(for: themeColor))
+        }
+    }
+    
+    private func gradiantColor(for card: Color) -> LinearGradient {
+        let gradientLayer = Gradient(colors: [Color.white, card])
+        let gradiantCardColor = LinearGradient(gradient: gradientLayer, startPoint: .leading, endPoint: .topTrailing)
+        return gradiantCardColor
     }
     
     // MARK: - Drawing Constants
-    let cornerRadius: CGFloat = 10.0
-    let edgeLineWidth: CGFloat = 3
-    //let fontScaleFactor: CGFloat = 0.75
-    func fontSize(for size: CGSize) -> CGFloat {
-        min(size.width, size.height) * 0.75
+    private func fontSize(for size: CGSize) -> CGFloat {
+        min(size.width, size.height) * 0.7
     }
 }
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        EmojiMemoryGameView(viewModel: EmojiMemoryGame())
+        let game = EmojiMemoryGame()
+        game.choose(card: game.cards[0])
+        
+        return EmojiMemoryGameView(viewModel: game)
     }
 }
